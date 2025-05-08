@@ -1,6 +1,7 @@
 # srs/schemas/health_schema.py
 from pydantic import BaseModel
 
+
 class HealthCheckResponse(BaseModel):
     status: str
     db_mode: str | None = None
@@ -8,9 +9,5 @@ class HealthCheckResponse(BaseModel):
 
     class Config:
         json_schema_extra = {
-            "example": {
-                "status": "OK",
-                "db_mode": "mock",
-                "db_connection": "success"
-            }
+            "example": {"status": "OK", "db_mode": "mock", "db_connection": "success"}
         }
