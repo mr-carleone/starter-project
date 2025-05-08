@@ -8,6 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def init_default_data():
     if settings.DB_MODE != "real":
         return
@@ -31,7 +32,7 @@ def init_default_data():
                 username=settings.INITIAL_USER_USERNAME,
                 email=settings.INITIAL_USER_EMAIL,
                 phone=settings.INITIAL_USER_PHONE,
-                password=settings.INITIAL_USER_PASSWORD
+                password=settings.INITIAL_USER_PASSWORD,
             )
 
             user_repo.create_user(user_data, role_id=role.id)

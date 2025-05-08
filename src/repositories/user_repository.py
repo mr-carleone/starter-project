@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 class UserRepository:
     def __init__(self, db: Session):
         self.db = db
@@ -33,7 +34,7 @@ class UserRepository:
             email=user_data.email,
             phone=user_data.phone,
             hashed_password=hashed_password,
-            role_id=role_id
+            role_id=role_id,
         )
 
         try:

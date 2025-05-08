@@ -2,6 +2,7 @@
 from pydantic_settings import BaseSettings
 from pydantic import PostgresDsn
 
+
 class Settings(BaseSettings):
     # Тестовый суперпользователь
     INITIAL_USER_USERNAME: str = "admin"
@@ -17,7 +18,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str = "5432"
 
     SECRET_KEY: str = "your-256-bit-secret"  # Минимум 32 символа
-    ALGORITHM: str = "HS256"                 # Или другой алгоритм (например, RS256)
+    ALGORITHM: str = "HS256"  # Или другой алгоритм (например, RS256)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     ENV: str = "dev"
@@ -33,5 +34,6 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         extra = "ignore"
+
 
 settings = Settings()

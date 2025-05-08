@@ -2,4 +2,4 @@
 from .base import Base
 from .mixins import AuditMixin
 
-__all__=["Base", "AuditMixin"]
+__all__ = ["Base", "AuditMixin"]

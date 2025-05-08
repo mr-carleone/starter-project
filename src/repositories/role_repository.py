@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from src.entities.user import Role
 
+
 class RoleRepository:
     def __init__(self, db: Session):
         self.db = db
