@@ -28,11 +28,12 @@ app = FastAPI(
         "docExpansion": "none",
         "defaultModelsExpandDepth": -1,
         "displayRequestDuration": True,
-        "customSiteTitle": "Transport Logistics API"
-    }
+        "customSiteTitle": "Transport Logistics API",
+    },
 )
 
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
+
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
@@ -40,13 +41,15 @@ async def custom_swagger_ui_html():
         openapi_url=app.openapi_url,
         title=app.title + " - Swagger UI",
         swagger_css_url="/static/swagger/custom_swagger.css",
-        swagger_ui_parameters=app.swagger_ui_parameters
+        swagger_ui_parameters=app.swagger_ui_parameters,
     )
+
 
 app.include_router(healthcheck.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(roles.router)
+
 
 @app.get("/healthcheck")
 def healthcheck():

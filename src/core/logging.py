@@ -3,6 +3,7 @@ import logging
 from colorlog import ColoredFormatter
 from src.core.config import settings
 
+
 def setup_logging():
     logger = logging.getLogger()
     logger.setLevel(settings.LOG_LEVEL)
@@ -14,12 +15,12 @@ def setup_logging():
             datefmt="%Y-%m-%d %H:%M:%S",
             reset=True,
             log_colors={
-                'DEBUG': 'cyan',
-                'INFO': 'green',
-                'WARNING': 'yellow',
-                'ERROR': 'red',
-                'CRITICAL': 'red,bg_white',
-            }
+                "DEBUG": "cyan",
+                "INFO": "green",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "red,bg_white",
+            },
         )
     else:
         # JSON format for production

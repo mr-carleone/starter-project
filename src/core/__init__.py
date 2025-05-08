@@ -2,4 +2,4 @@
 from .config import Settings
 from .database import Database
 
-__all__=["Settings", "Database"]
+__all__ = ["Settings", "Database"]
