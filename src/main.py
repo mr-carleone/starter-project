@@ -2,14 +2,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.docs import get_swagger_ui_html
-from src.routes import healthcheck
-from src.routes import auth
-from src.routes import roles
-from src.routes import users
+from src.routes import healthcheck_routes
+from src.routes import auth_routes
+from src.routes import roles_routes
+from src.routes import users_routes
 from src.core.config import settings
 from src.core.logging import setup_logging
 from src.core.database import adb
-from src.core.initial_data import initialize_default_data
+from src.services.initial_data_service import InitialDataService
 import logging
 
 # Настройка логгера должна быть первой
@@ -29,7 +29,10 @@ async def lifespan(app: FastAPI):
     logger.info("Database connection established")
 
     # Инициализация данных
-    await initialize_default_data()
+    async with adb.get_session() as session:
+        initial_service = InitialDataService(session)
+        await initial_service.initialize()
+
     logger.info("Initial data setup completed")
 
     yield
@@ -42,15 +45,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     lifespan=lifespan,
-    title="Transport Logistics API",
-    description="API для управления автомобильными и железнодорожными отгрузками",
+    title="Test Logistics API",
+    description="API для начальной разработки",
     version="1.0.0",
     swagger_ui_parameters={
         "syntaxHighlight": True,
         "docExpansion": "none",
         "defaultModelsExpandDepth": -1,
         "displayRequestDuration": True,
-        "customSiteTitle": "Transport Logistics API",
+        "customSiteTitle": "Test Logistics API",
         "swagger_favicon_url": "/static/favicon.ico",
     },
 )
@@ -69,10 +72,10 @@ async def custom_swagger_ui_html():
 
 
 # Подключение роутеров
-app.include_router(healthcheck.router)
-app.include_router(auth.router)
-app.include_router(users.router)
-app.include_router(roles.router)
+app.include_router(healthcheck_routes.router)
+app.include_router(auth_routes.router)
+app.include_router(users_routes.router)
+app.include_router(roles_routes.router)
 
 
 @app.get("/healthcheck")

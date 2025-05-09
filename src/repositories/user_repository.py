@@ -3,12 +3,10 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
-from passlib.context import CryptContext
+from src.core.security import pwd_context
 
 from src.entities.user import User, Role
 from src.schemas.user_schema import UserCreate
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class AsyncUserRepository:
@@ -22,6 +20,18 @@ class AsyncUserRepository:
     async def get_user_by_username(self, username: str) -> User:
         result = await self.db.execute(select(User).filter(User.username == username))
         return result.scalars().first()
+
+    async def authenticate_user(self, username: str, password: str) -> User:
+        user = await self.get_user_by_username(username)
+        if user and pwd_context.verify(password, user.hashed_password):
+            return user
+        return None
+
+    async def delete_user(self, user_id: UUID) -> None:
+        user = await self.db.get(User, user_id)
+        if user:
+            await self.db.delete(user)
+            await self.db.commit()
 
     async def create_user(self, user_data: UserCreate, role_id: UUID) -> User:
         hashed_password = pwd_context.hash(user_data.password)

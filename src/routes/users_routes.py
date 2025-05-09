@@ -2,17 +2,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from src.services.user_service import UserService
 from src.schemas.user_schema import UserCreate, UserInDB
-from src.core.unit_of_work import UnitOfWork
-from src.core.dependencies import get_uow
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.core.dependencies import get_db
 
 router = APIRouter(prefix="/api/v1/users", tags=["users"])
 
 
 @router.post("/", response_model=UserInDB, status_code=status.HTTP_201_CREATED)
-async def create_user(user_data: UserCreate, uow: UnitOfWork = Depends(get_uow)):
+async def create_user(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     try:
-        async with uow:
-            service = UserService(uow.session)
+        async with db:
+            service = UserService(db)
             return await service.create_user(user_data)
     except ValueError as e:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(e))

@@ -1,8 +1,7 @@
-version: "3.7"
-
 services:
   postgres:
     image: postgres:13
+    container_name: postgres_container
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -21,6 +20,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
+    container_name: pgadmin_container
     environment:
       PGADMIN_DEFAULT_EMAIL: ivan@rus.ru
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -35,6 +35,7 @@ services:
 
   fastapi:
     build: .
+    container_name: fastapi_container
     volumes:
       - ./src:/app/src
       - ./alembic:/app/alembic
@@ -50,8 +51,8 @@ services:
 
 networks:
   app-net:
-    external: true
     driver: bridge
+    external: true
 
 volumes:
   postgres-data:

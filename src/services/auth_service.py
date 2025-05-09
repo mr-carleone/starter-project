@@ -3,16 +3,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.security import create_access_token
 from src.repositories.user_repository import AsyncUserRepository
 from src.schemas.auth_schema import TokenResponse
+from src.services.base_service import BaseService
 
 
-class AuthService:
+class AuthService(BaseService):
     def __init__(self, session: AsyncSession):
+        super().__init__(session)
         self.user_repo = AsyncUserRepository(session)
         self._current_user = None
 
     @classmethod
-    async def from_session(cls, session: AsyncSession):
-        """Альтернативный фабричный метод"""
+    async def create(cls, session: AsyncSession):
         return cls(session)
 
     @property

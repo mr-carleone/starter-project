@@ -2,8 +2,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from src.schemas.health_schema import HealthCheckResponse
 from src.services.healthcheck_service import HealthcheckService
-from src.core.unit_of_work import UnitOfWork
-from src.core.dependencies import get_uow
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.core.dependencies import get_db
 
 router = APIRouter(tags=["System Health Checks"], prefix="/api/v1/healthcheck/db")
 
@@ -38,7 +38,7 @@ router = APIRouter(tags=["System Health Checks"], prefix="/api/v1/healthcheck/db
         },
     },
 )
-async def db_healthcheck(uow: UnitOfWork = Depends(get_uow)):
+async def db_healthcheck(db: AsyncSession = Depends(get_db)):
     """
     Performs a health check of the database connection.
 
@@ -50,8 +50,8 @@ async def db_healthcheck(uow: UnitOfWork = Depends(get_uow)):
     - HTTPException 500: If database connection test fails
     """
     try:
-        async with uow:
-            service = HealthcheckService(uow.session)
-            return await service.check_db_health(uow)
+        async with db:
+            service = HealthcheckService(db)
+            return await service.perform_db_check()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

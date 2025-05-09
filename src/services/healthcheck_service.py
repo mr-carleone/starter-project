@@ -2,15 +2,15 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from src.core.config import settings
+from src.services.base_service import BaseService
 
 
-class HealthcheckService:
+class HealthcheckService(BaseService):
     def __init__(self, session: AsyncSession):
-        self.session = session
+        super().__init__(session)
 
     @classmethod
     async def create(cls, session: AsyncSession):
-        """Фабричный метод для создания сервиса"""
         return cls(session)
 
     @property
