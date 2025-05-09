@@ -18,3 +18,4 @@ sqlalchemy-utils>=0.41
 anyio>=4.0
 httpx>=0.28
 python-multipart>=0.0.5
+cachetools>=5.3.1

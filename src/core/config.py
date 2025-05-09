@@ -4,6 +4,11 @@ from pydantic import PostgresDsn
 
 
 class Settings(BaseSettings):
+    # Добавляем новые настройки
+    SYSTEM_USERNAME: str = "system"
+    INITIAL_ROLE_CREATED_BY: str = "system"
+    INITIAL_USER_CREATED_BY: str = "system"
+
     # Тестовый суперпользователь
     INITIAL_USER_USERNAME: str = "admin"
     INITIAL_USER_EMAIL: str = "admin@example.com"

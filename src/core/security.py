@@ -1,10 +1,9 @@
 # src/core/security.py
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-from jose import jwt
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 from src.core.config import settings
-from passlib.hash import argon2
 
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -42,3 +41,19 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
+
+
+def verify_token(token: str) -> dict:
+    """
+    Верификация JWT токена
+    :param token: JWT токен
+    :return: Декодированные данные токена
+    :raises JWTError: Если токен невалиден
+    """
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        return payload
+    except JWTError as e:
+        raise JWTError("Invalid token") from e
