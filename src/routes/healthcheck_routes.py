@@ -1,10 +1,9 @@
-# src/routes/healthcheck.py
+# src/routes/healthcheck_routes.py
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import text
-from sqlalchemy.orm import Session
-from src.core.database import get_db
-from src.core.config import settings
 from src.schemas.health_schema import HealthCheckResponse
+from src.services.healthcheck_service import HealthcheckService
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.core.dependencies import get_db
 
 router = APIRouter(tags=["System Health Checks"], prefix="/api/v1/healthcheck/db")
 
@@ -39,7 +38,7 @@ router = APIRouter(tags=["System Health Checks"], prefix="/api/v1/healthcheck/db
         },
     },
 )
-async def db_healthcheck(db: Session = Depends(get_db)):
+async def db_healthcheck(db: AsyncSession = Depends(get_db)):
     """
     Performs a health check of the database connection.
 
@@ -50,13 +49,9 @@ async def db_healthcheck(db: Session = Depends(get_db)):
     Raises:
     - HTTPException 500: If database connection test fails
     """
-    if settings.DB_MODE == "mock":
-        return {"status": "OK", "db_mode": "mock"}
-
     try:
-        db.execute(text("SELECT 1"))
-        return {"status": "OK", "db_connection": "success"}
+        async with db:
+            service = HealthcheckService(db)
+            return await service.perform_db_check()
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Database connection failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=str(e))

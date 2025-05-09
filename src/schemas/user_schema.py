@@ -20,6 +20,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8, max_length=50)
+    role_id: UUID = Field(..., description="ID роли пользователя")
 
 
 class UserUpdate(UserBase):

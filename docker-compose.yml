@@ -1,12 +1,11 @@
-version: '3.7'
-
 services:
   postgres:
     image: postgres:13
+    container_name: postgres_container
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
-      POSTGRES_DB: ${POSTGRES_DB:-transport_db}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     networks:
@@ -21,6 +20,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
+    container_name: pgadmin_container
     environment:
       PGADMIN_DEFAULT_EMAIL: ivan@rus.ru
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -35,6 +35,7 @@ services:
 
   fastapi:
     build: .
+    container_name: fastapi_container
     volumes:
       - ./src:/app/src
       - ./alembic:/app/alembic
@@ -46,12 +47,12 @@ services:
         condition: service_healthy
     networks:
       - app-net
-    command: sh -c "sleep 10 && alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: sh -c "sleep 20 && alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
 
 networks:
   app-net:
-    external: true
     driver: bridge
+    external: true
 
 volumes:
   postgres-data:

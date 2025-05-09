@@ -1,33 +1,40 @@
 # src/repositories/user_repository.py
 from uuid import UUID
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from passlib.context import CryptContext
+from sqlalchemy import select
+from src.core.security import pwd_context
 
 from src.entities.user import User, Role
 from src.schemas.user_schema import UserCreate
-from src.core.logging import setup_logging
-import logging
-
-logger = logging.getLogger(__name__)
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-class UserRepository:
-    def __init__(self, db: Session):
+class AsyncUserRepository:
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def role_exists(self, role_id: UUID) -> bool:
-        return self.db.query(Role).filter(Role.id == role_id).first() is not None
+    async def role_exists(self, role_id: UUID) -> bool:
+        result = await self.db.execute(select(Role).filter(Role.id == role_id))
+        return result.scalars().first() is not None
 
-    def get_user_by_username(self, username: str) -> User:
-        return self.db.query(User).filter(User.username == username).first()
+    async def get_user_by_username(self, username: str) -> User:
+        result = await self.db.execute(select(User).filter(User.username == username))
+        return result.scalars().first()
 
-    def create_user(self, user_data: UserCreate, role_id: UUID) -> User:
-        logger.info(user_data)
+    async def authenticate_user(self, username: str, password: str) -> User:
+        user = await self.get_user_by_username(username)
+        if user and pwd_context.verify(password, user.hashed_password):
+            return user
+        return None
+
+    async def delete_user(self, user_id: UUID) -> None:
+        user = await self.db.get(User, user_id)
+        if user:
+            await self.db.delete(user)
+            await self.db.commit()
+
+    async def create_user(self, user_data: UserCreate, role_id: UUID) -> User:
         hashed_password = pwd_context.hash(user_data.password)
-        logger.info(hashed_password)
 
         user = User(
             username=user_data.username,
@@ -39,11 +46,11 @@ class UserRepository:
 
         try:
             self.db.add(user)
-            self.db.commit()
-            self.db.refresh(user)
+            await self.db.commit()
+            await self.db.refresh(user)
             return user
         except IntegrityError as e:
-            self.db.rollback()
+            await self.db.rollback()
             if "username" in str(e):
                 raise ValueError("Username already exists")
             elif "email" in str(e):
