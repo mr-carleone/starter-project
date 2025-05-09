@@ -1,14 +1,12 @@
 # src/routes/auth.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from src.core.security import create_access_token
-from src.repositories.user_repository import UserRepository
+from src.services.auth_service import AuthService
+from src.core.unit_of_work import UnitOfWork
+from src.core.dependencies import get_uow
 from src.schemas.auth_schema import TokenResponse
-from sqlalchemy.orm import Session
-from src.core.database import get_db
 
 router = APIRouter(tags=["Authentication"], prefix="/api/v1/auth")
-
 
 @router.post(
     "/login",
@@ -47,7 +45,8 @@ router = APIRouter(tags=["Authentication"], prefix="/api/v1/auth")
     },
 )
 async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    uow: UnitOfWork = Depends(get_uow),
 ):
     """
     Authenticate user and generate JWT token
@@ -59,26 +58,13 @@ async def login(
     Returns:
     - JWT access token for authorized requests
     """
-    user_repo = UserRepository(db)
 
     try:
-        user = user_repo.authenticate_user(form_data.username, form_data.password)
+        async with uow:
+            service = AuthService(uow)
+            return await service.authenticate(form_data.username, form_data.password)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Authentication process failed",
-        ) from e
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect username or password",
-        )
-
-    try:
-        return {"access_token": create_access_token(user.id), "token_type": "bearer"}
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Token generation failed",
         ) from e
