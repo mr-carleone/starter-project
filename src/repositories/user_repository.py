@@ -1,5 +1,6 @@
 # src/repositories/user_repository.py
 from uuid import UUID
+from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
@@ -27,11 +28,13 @@ class AsyncUserRepository:
             return user
         return None
 
-    async def delete_user(self, user_id: UUID) -> None:
+    async def delete_user(self, user_id: UUID) -> bool:
         user = await self.db.get(User, user_id)
-        if user:
-            await self.db.delete(user)
-            await self.db.commit()
+        if not user:
+            return False
+        await self.db.delete(user)
+        await self.db.commit()
+        return True
 
     async def create_user(self, user_data: UserCreate, role_id: UUID) -> User:
         hashed_password = pwd_context.hash(user_data.password)
@@ -42,6 +45,7 @@ class AsyncUserRepository:
             phone=user_data.phone,
             hashed_password=hashed_password,
             role_id=role_id,
+            is_active=user_data.is_active,
         )
 
         try:
@@ -58,3 +62,26 @@ class AsyncUserRepository:
             elif "phone" in str(e):
                 raise ValueError("Phone number already exists")
             raise ValueError("Database integrity error")
+
+    async def get_user_by_id(self, user_id: UUID) -> Optional[User]:
+        result = await self.db.execute(select(User).filter(User.id == user_id))
+        return result.scalars().first()
+
+    async def update_user(self, user_id: UUID, update_values: dict) -> User:
+        user = await self.get_user_by_id(user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        # Обновляем только разрешенные поля
+        allowed_fields = {"username", "email", "phone", "hashed_password", "role_id"}
+        for key, value in update_values.items():
+            if key in allowed_fields:
+                setattr(user, key, value)
+
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
+
+    async def get_all_users(self) -> List[User]:
+        result = await self.db.execute(select(User))
+        return result.scalars().all()

@@ -28,3 +28,21 @@ class AsyncRoleRepository:
     async def get_all_roles(self) -> List[Role]:
         result = await self.db.execute(select(Role))
         return result.scalars().all()
+
+    async def update_role(self, role_id: UUID, name: str) -> Role:
+        role = await self.get_role_by_id(role_id)
+        if not role:
+            raise ValueError("Role not found")
+
+        role.name = name
+        await self.db.commit()
+        await self.db.refresh(role)
+        return role
+
+    async def delete_role(self, role_id: UUID) -> bool:
+        role = await self.db.get(Role, role_id)
+        if not role:
+            return False
+        await self.db.delete(role)
+        await self.db.commit()
+        return True

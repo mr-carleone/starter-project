@@ -1,5 +1,5 @@
 # src/entities/user.py
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
@@ -47,6 +47,10 @@ class User(Base, AuditMixin):
     phone = Column(String(20), unique=True, nullable=False, comment="Номер телефона")
 
     hashed_password = Column(String(255), nullable=False, comment="Хэшированный пароль")
+
+    is_active = Column(
+        Boolean, default=False, nullable=False, comment="Активен ли пользователь"
+    )
 
     role_id = Column(
         UUID(as_uuid=True),

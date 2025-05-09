@@ -1,6 +1,7 @@
 # src/services/initial_data_service.py
 from src.core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.schemas.user_schema import UserCreate
 from src.services.role_service import RoleService
 from src.services.user_service import UserService
 from src.core.exceptions import NotFoundError
@@ -38,11 +39,14 @@ class InitialDataService:
                 role = await role_service.get_role_by_name(settings.INITIAL_USER_ROLE)
 
                 await user_service.create_user(
-                    username=settings.INITIAL_USER_USERNAME,
-                    email=settings.INITIAL_USER_EMAIL,
-                    phone=settings.INITIAL_USER_PHONE,
-                    password=settings.INITIAL_USER_PASSWORD,
-                    role_id=role.id,
+                    user_data=UserCreate(
+                        username=settings.INITIAL_USER_USERNAME,
+                        email=settings.INITIAL_USER_EMAIL,
+                        phone=settings.INITIAL_USER_PHONE,
+                        password=settings.INITIAL_USER_PASSWORD,
+                        role_id=role.id,
+                        is_active=True,
+                    )
                 )
 
                 logger.info("Admin user created successfully")
