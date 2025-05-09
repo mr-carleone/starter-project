@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = "postgres"
     POSTGRES_PORT: str = "5432"
 
-    # Ключи для token
+    # Keys for token
     SECRET_KEY: str = "your-256-bit-secret"  # Минимум 32 символа
     ALGORITHM: str = "HS256"  # Или другой алгоритм (например, RS256)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
