@@ -8,6 +8,16 @@ def setup_logging():
     logger = logging.getLogger()
     logger.setLevel(settings.LOG_LEVEL)
 
+    # Настройка для SQLAlchemy
+    sqlalchemy_logger = logging.getLogger('sqlalchemy')
+    sqlalchemy_logger.setLevel(logging.WARNING if settings.ENV == 'prod' else logging.INFO)
+
+    # Отключаем логирование пула соединений
+    logging.getLogger('sqlalchemy.pool').setLevel(logging.ERROR)
+    logging.getLogger('sqlalchemy.engine').setLevel(
+        logging.WARNING if settings.ENV == 'prod' else logging.INFO
+    )
+
     if settings.ENV == "dev":
         # Color format for development
         formatter = ColoredFormatter(

@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, status
 from src.services.user_service import UserService
 from src.schemas.user_schema import UserCreate, UserUpdate, UserInDB
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.core.dependencies import get_db
-from src.core.auth_dependencies import required_roles
+from src.core.dependencies import (get_db)
+from src.core.auth_dependencies import required_roles, get_current_user_username
 from uuid import UUID
 
 router = APIRouter(prefix="/api/v1/users", tags=["users"])
@@ -15,9 +15,13 @@ router = APIRouter(prefix="/api/v1/users", tags=["users"])
     response_model=UserInDB,
     dependencies=[Depends(required_roles(["FULL_ACCESS"]))],
 )
-async def create_user(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
+async def create_user(
+    user_data: UserCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user_username)
+):
     service = UserService(db)
-    return await service.create_user(user_data)
+    return await service.create_user(user_data, current_user)
 
 
 @router.get(
@@ -46,10 +50,13 @@ async def get_user(user_id: UUID, db: AsyncSession = Depends(get_db)):
     dependencies=[Depends(required_roles(["FULL_ACCESS"]))],
 )
 async def update_user(
-    user_id: UUID, update_data: UserUpdate, db: AsyncSession = Depends(get_db)
+    user_id: UUID,
+    update_data: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user_username)
 ):
     service = UserService(db)
-    return await service.update_user(user_id, update_data)
+    return await service.update_user(user_id, update_data, current_user)
 
 
 @router.delete(
