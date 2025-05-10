@@ -18,8 +18,8 @@ class AsyncRoleRepository:
         result = await self.db.execute(select(Role).filter(Role.name == name))
         return result.scalars().first()
 
-    async def create_role(self, name: str, created_by: str) -> Role:
-        role = Role(name=name, created_by=created_by)
+    async def create_role(self, name: str, current_user: str) -> Role:
+        role = Role(name=name, created_by=current_user)
         self.db.add(role)
         await self.db.commit()
         await self.db.refresh(role)

@@ -6,6 +6,7 @@ from src.routes import healthcheck_routes
 from src.routes import auth_routes
 from src.routes import roles_routes
 from src.routes import users_routes
+from src.routes import init_routes
 from src.core.config import settings
 from src.core.logging import setup_logging
 from src.core.database import adb
@@ -69,6 +70,7 @@ app.include_router(healthcheck_routes.router)
 app.include_router(auth_routes.router)
 app.include_router(users_routes.router)
 app.include_router(roles_routes.router)
+app.include_router(init_routes.router)
 
 
 @app.get("/healthcheck")

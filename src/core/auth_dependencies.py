@@ -42,5 +42,8 @@ def required_roles(roles: list[str]):
 
     return checker
 
-async def get_current_user_username(current_user: UserInDB = Depends(get_current_user)) -> str:
+
+async def get_current_user_username(
+    current_user: UserInDB = Depends(get_current_user),
+) -> str:
     return current_user.username
