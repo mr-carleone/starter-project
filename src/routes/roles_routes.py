@@ -28,7 +28,7 @@ async def get_roles(db: AsyncSession = Depends(get_db)):
 async def create_role(
     role_data: RoleCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: str = Depends(get_current_user_username)
+    current_user: str = Depends(get_current_user_username),
 ):
     service = RoleService(db)
     return await service.create_role(role_data.name, current_user)
@@ -43,7 +43,7 @@ async def update_role(
     role_id: UUID,
     role_data: RoleUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: str = Depends(get_current_user_username)
+    current_user: str = Depends(get_current_user_username),
 ):
     service = RoleService(db)
     return await service.update_role(role_id, role_data.name, current_user)

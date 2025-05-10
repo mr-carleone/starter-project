@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     INITIAL_USER_CREATED_BY: str = "system"
 
     # Тестовый суперпользователь
+    INITIAL_USER_TOKEN: str = "8c6256c0-9db7-4e0d-ba61-1dee5eea40aa"
     INITIAL_USER_USERNAME: str = "admin"
     INITIAL_USER_EMAIL: str = "admin@example.com"
     INITIAL_USER_PHONE: str = "+79998887766"
