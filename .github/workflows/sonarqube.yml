@@ -39,7 +39,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=mr-carleone
-            -Dsonar.organization=Ерусланов Иван
+            -Dsonar.organization=mr-carleone
             -Dsonar.sources=src
             -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.python.version=3.11
