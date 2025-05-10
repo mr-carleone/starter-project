@@ -41,8 +41,15 @@ $ cp .env.template .env
 
 $ docker network create app-net
 
-# Запустить проект
-$ docker-compose up --build
+# запустить по очереди сервисы
+# зависимости если нужно postgres, pgadmin
+$ docker-compose -f docker-compose.deps.yml up -d
+# основное приложение
+$ docker-compose -f docker-compose.yml up -d
+
+# Создать первоначального пользователя
+# 1 INITIAL_USER_TOKEN=8c6256c0-9db7-4e0d-ba61-1dee5eea40aa  заменить на свой
+# 2 /api/v1/init/ выполнит инициализацию предварительно добавив свой api-key в header
 ```
 
 API будет доступно по адресу:
