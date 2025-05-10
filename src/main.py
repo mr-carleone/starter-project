@@ -1,76 +1,14 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.openapi.docs import get_swagger_ui_html
-from src.routes import healthcheck_routes
-from src.routes import auth_routes
-from src.routes import roles_routes
-from src.routes import users_routes
-from src.routes import init_routes
-from src.core.config import settings
+from src.config.app import create_app, configure_routers
+from src.utils.lifespan import lifespan
 from src.core.logging import setup_logging
-from src.core.database import adb
-import logging
 
 # Настройка логгера должна быть первой
 setup_logging()
 
-logger = logging.getLogger(__name__)
-logger.info(f"ENV: {settings.ENV}, LOG_LEVEL: {settings.LOG_LEVEL}")
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    try:
-        logger.info("Database connection establishing...")
-        await adb.connect()
-        logger.info("Database connection established")
-        yield
-    except Exception as e:
-        logger.error(f"Database connection error: {e}")
-        raise
-    finally:
-        logger.info("Shutting down application...")
-        if adb.engine:
-            await adb.engine.dispose()
-
-
-app = FastAPI(
-    lifespan=lifespan,
-    title="Test Logistics API",
-    description="API для начальной разработки",
-    version="1.0.0",
-    swagger_ui_parameters={
-        "syntaxHighlight": True,
-        "docExpansion": "none",
-        "defaultModelsExpandDepth": -1,
-        "displayRequestDuration": True,
-        "customSiteTitle": "Test Logistics API",
-        "swagger_favicon_url": "/static/favicon.ico",
-    },
-)
-
+app = create_app()
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
+configure_routers(app)
 
-
-@app.get("/docs", include_in_schema=False)
-async def custom_swagger_ui_html():
-    return get_swagger_ui_html(
-        openapi_url=app.openapi_url,
-        title=app.title + " - Swagger UI",
-        swagger_css_url="/static/swagger/custom_swagger.css",
-        swagger_ui_parameters=app.swagger_ui_parameters,
-    )
-
-
-# Подключение роутеров
-app.include_router(healthcheck_routes.router)
-app.include_router(auth_routes.router)
-app.include_router(users_routes.router)
-app.include_router(roles_routes.router)
-app.include_router(init_routes.router)
-
-
-@app.get("/healthcheck")
-async def healthcheck():
-    return {"status": "ok"}
+# Добавление lifespan
+app.router.lifespan_context = lifespan

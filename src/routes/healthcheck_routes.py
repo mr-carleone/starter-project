@@ -5,11 +5,14 @@ from src.services.healthcheck_service import HealthcheckService
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.dependencies import get_db
 
-router = APIRouter(tags=["System Health Checks"], prefix="/api/v1/healthcheck/db")
+router = APIRouter(tags=["System Health Checks"], prefix="/api/v1/healthcheck")
 
+@router.get("/")
+async def healthcheck():
+    return {"status": "ok"}
 
 @router.get(
-    "/",
+    "/db",
     response_model=HealthCheckResponse,
     status_code=status.HTTP_200_OK,
     summary="Check database connection status",
