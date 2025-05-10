@@ -38,7 +38,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=8c6256c0-9db7-4e0d-ba61-1dee5eea40aa
+            -Dsonar.projectKey=mr-carleone_starter-project
             -Dsonar.organization=8c6256c0-9db7-4e0d-ba61-1dee5eea40aa
             -Dsonar.sources=src
             -Dsonar.python.coverage.reportPaths=coverage.xml
