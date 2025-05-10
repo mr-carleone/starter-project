@@ -9,7 +9,6 @@ from src.routes import users_routes
 from src.core.config import settings
 from src.core.logging import setup_logging
 from src.core.database import adb
-from src.services.initial_data_service import InitialDataService
 import logging
 
 # Настройка логгера должна быть первой
@@ -24,20 +23,14 @@ async def lifespan(app: FastAPI):
     # Стартовая логика
     logger.info("Starting application...")
 
-    # Подключение к БД
+    logger.info("Starting application...")
     await adb.connect()
     logger.info("Database connection established")
 
-    # Инициализация данных
-    async with adb.get_session() as session:
-        initial_service = InitialDataService(session)
-        await initial_service.initialize()
-
-    logger.info("Initial data setup completed")
+    # Удален блок инициализации данных
 
     yield
 
-    # Логика завершения (опционально)
     logger.info("Shutting down application...")
     await adb.engine.dispose()
     logger.info("Database connection closed")
