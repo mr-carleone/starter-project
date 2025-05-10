@@ -31,7 +31,7 @@ class RoleService(BaseService):
             role = await self.repo.create_role(name, current_user)
             return RoleResponse.model_validate(role)
         except IntegrityError:
-            raise ValueError("Role name must be unique")
+            raise ValueError("Role name must be unique not duplicate")
 
     @cached(role_cache)
     async def get_role_by_id(self, role_id: UUID) -> RoleResponse:

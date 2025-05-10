@@ -23,7 +23,7 @@ logger.info(f"ENV: {settings.ENV}, LOG_LEVEL: {settings.LOG_LEVEL}")
 async def lifespan(app: FastAPI):
     try:
         logger.info("Database connection establishing...")
-        await adb.connect()  # Убедитесь, что engine инициализирован
+        await adb.connect()
         logger.info("Database connection established")
         yield
     except Exception as e:

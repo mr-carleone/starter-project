@@ -16,9 +16,6 @@ class InitialDataService:
 
     async def initialize(self):
         try:
-            if settings.DB_MODE != "real":
-                return
-
             # Инициализация ролей
             role_service = RoleService(self.session)
             existing_roles = await role_service.get_all_roles()
