@@ -18,6 +18,17 @@ down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+def common_columns():
+    return [
+        sa.Column('version', sa.Integer, server_default=sa.text('1'), nullable=False),
+        sa.Column('create_ts', sa.TIMESTAMP(timezone=True), server_default=func.now()),
+        sa.Column('created_by', sa.String(50)),
+        sa.Column('update_ts', sa.TIMESTAMP(timezone=True), onupdate=func.now()),
+        sa.Column('updated_by', sa.String(50)),
+        sa.Column('delete_ts', sa.TIMESTAMP(timezone=True)),
+        sa.Column('deleted_by', sa.String(50)),
+    ]
+
 
 def upgrade() -> None:
     """Upgrade schema."""
@@ -30,13 +41,7 @@ def upgrade() -> None:
             primary_key=True,
             nullable=False
         ),
-        sa.Column('version', sa.Integer, server_default=sa.text('1'), nullable=False),
-        sa.Column('create_ts', sa.TIMESTAMP(timezone=True), server_default=func.now()),
-        sa.Column('created_by', sa.String(50)),
-        sa.Column('update_ts', sa.TIMESTAMP(timezone=True), onupdate=func.now()),
-        sa.Column('updated_by', sa.String(50)),
-        sa.Column('delete_ts', sa.TIMESTAMP(timezone=True)),
-        sa.Column('deleted_by', sa.String(50)),
+        *common_columns(),
         sa.Column('name', sa.String(length=50), nullable=False),
     )
 
@@ -48,13 +53,7 @@ def upgrade() -> None:
             primary_key=True,
             nullable=False
         ),
-        sa.Column('version', sa.Integer, server_default=sa.text('1'), nullable=False),
-        sa.Column('create_ts', sa.TIMESTAMP(timezone=True), server_default=func.now()),
-        sa.Column('created_by', sa.String(50)),
-        sa.Column('update_ts', sa.TIMESTAMP(timezone=True), onupdate=func.now()),
-        sa.Column('updated_by', sa.String(50)),
-        sa.Column('delete_ts', sa.TIMESTAMP(timezone=True)),
-        sa.Column('deleted_by', sa.String(50)),
+        *common_columns(),
         sa.Column('username', sa.String(length=50), nullable=False),
         sa.Column('email', sa.String(length=100), nullable=False),
         sa.Column('phone', sa.String(length=20), nullable=False),

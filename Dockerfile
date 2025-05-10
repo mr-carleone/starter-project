@@ -4,7 +4,9 @@ ENV PYTHONPATH=/app
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y netcat-traditional
+RUN apt-get update && \
+    apt-get install -y netcat-traditional && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements /app/requirements
 RUN pip install --upgrade pip && \
