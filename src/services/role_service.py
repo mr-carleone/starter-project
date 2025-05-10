@@ -24,9 +24,9 @@ class RoleService(BaseService):
         roles = await self.repo.get_all_roles()
         return [RoleResponse.model_validate(role) for role in roles]
 
-    async def create_role_without_commit(self, name: str) -> RoleResponse:
+    async def create_role_without_commit(self, name: str, current_user: str) -> RoleResponse:
         try:
-            role = await self.repo.create_role(name)
+            role = await self.repo.create_role(name, created_by=current_user)
             return RoleResponse.model_validate(role)
         except IntegrityError:
             raise ValueError("Role name must be unique")
@@ -44,18 +44,18 @@ class RoleService(BaseService):
             raise NotFoundError(f"Role with name {role_name} not found")
         return RoleResponse.model_validate(role)
 
-    async def create_role(self, name: str) -> RoleResponse:
+    async def create_role(self, name: str, current_user: str) -> RoleResponse:
         try:
-            role = await self.repo.create_role(name)
+            role = await self.repo.create_role(name, created_by=current_user)
             await self.commit()
             return RoleResponse.model_validate(role)
         except IntegrityError:
             await self.rollback()
             raise ValueError("Role name must be unique")
 
-    async def update_role(self, role_id: UUID, name: str) -> RoleResponse:
+    async def update_role(self, role_id: UUID, name: str, current_user: str) -> RoleResponse:
         try:
-            role = await self.repo.update_role(role_id, name)
+            role = await self.repo.update_role(role_id, name, current_user)
             await self.commit()
             return RoleResponse.model_validate(role)
         except IntegrityError:

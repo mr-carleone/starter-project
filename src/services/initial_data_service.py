@@ -25,8 +25,8 @@ class InitialDataService:
 
             if not existing_roles:
                 logger.info("Creating default roles")
-                await role_service.create_role_without_commit("FULL_ACCESS")
-                await role_service.create_role_without_commit("INTEGRATION_ROLE")
+                await role_service.create_role_without_commit("FULL_ACCESS", "system")
+                await role_service.create_role_without_commit("INTEGRATION_ROLE", "system")
                 await self.session.commit()
 
             # Инициализация администратора
@@ -45,8 +45,9 @@ class InitialDataService:
                         phone=settings.INITIAL_USER_PHONE,
                         password=settings.INITIAL_USER_PASSWORD,
                         role_id=role.id,
-                        is_active=True,
-                    )
+                        is_active=True
+                    ),
+                    current_user=settings.INITIAL_USER_CREATED_BY
                 )
 
                 logger.info("Admin user created successfully")

@@ -18,8 +18,8 @@ class AsyncRoleRepository:
         result = await self.db.execute(select(Role).filter(Role.name == name))
         return result.scalars().first()
 
-    async def create_role(self, name: str) -> Role:
-        role = Role(name=name)
+    async def create_role(self, name: str, created_by: str) -> Role:
+        role = Role(name=name, created_by=created_by)
         self.db.add(role)
         await self.db.commit()
         await self.db.refresh(role)
@@ -29,12 +29,13 @@ class AsyncRoleRepository:
         result = await self.db.execute(select(Role))
         return result.scalars().all()
 
-    async def update_role(self, role_id: UUID, name: str) -> Role:
+    async def update_role(self, role_id: UUID, name: str, updated_by: str) -> Role:
         role = await self.get_role_by_id(role_id)
         if not role:
             raise ValueError("Role not found")
 
         role.name = name
+        role.updated_by = updated_by
         await self.db.commit()
         await self.db.refresh(role)
         return role

@@ -50,13 +50,13 @@ class UserService(BaseService):
             )
             raise ValueError(f"{field.capitalize()} already exists")
 
-    async def create_user(self, user_data: UserCreate) -> UserInDB:
+    async def create_user(self, user_data: UserCreate, current_user: str) -> UserInDB:
         try:
             # Проверка роли через сервис
             await self.role_service.get_role_by_id(user_data.role_id)
 
             # Создание пользователя
-            user = await self.repo.create_user(user_data, user_data.role_id)
+            user = await self.repo.create_user(user_data, user_data.role_id, created_by=current_user)
             await self.commit()
             return user
 
@@ -75,12 +75,11 @@ class UserService(BaseService):
             raise NotFoundError("User")
         return UserInDB.model_validate(user)
 
-    async def update_user(self, user_id: UUID, update_data: UserUpdate) -> UserInDB:
+    async def update_user(self, user_id: UUID, update_data: UserUpdate, current_user: str) -> UserInDB:
         try:
             # Конвертируем схему в словарь, исключая не заданные поля
-            update_values = update_data.model_dump(
-                exclude_unset=True, exclude={"password"}
-            )
+            update_values = update_data.model_dump()
+            update_values['updated_by'] = current_user
             user = await self.repo.update_user(user_id, update_values)
             await self.commit()
             return UserInDB.model_validate(user)

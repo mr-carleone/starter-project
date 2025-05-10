@@ -36,7 +36,7 @@ class AsyncUserRepository:
         await self.db.commit()
         return True
 
-    async def create_user(self, user_data: UserCreate, role_id: UUID) -> User:
+    async def create_user(self, user_data: UserCreate, role_id: UUID, created_by: str) -> User:
         hashed_password = pwd_context.hash(user_data.password)
 
         user = User(
@@ -46,6 +46,7 @@ class AsyncUserRepository:
             hashed_password=hashed_password,
             role_id=role_id,
             is_active=user_data.is_active,
+            created_by=created_by
         )
 
         try:
@@ -67,10 +68,12 @@ class AsyncUserRepository:
         result = await self.db.execute(select(User).filter(User.id == user_id))
         return result.scalars().first()
 
-    async def update_user(self, user_id: UUID, update_values: dict) -> User:
+    async def update_user(self, user_id: UUID, update_values: dict, updated_by: str) -> User:
         user = await self.get_user_by_id(user_id)
         if not user:
             raise ValueError("User not found")
+
+        user.updated_by = updated_by
 
         # Обновляем только разрешенные поля
         allowed_fields = {"username", "email", "phone", "hashed_password", "role_id"}
