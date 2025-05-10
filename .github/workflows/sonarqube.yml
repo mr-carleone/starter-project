@@ -41,5 +41,7 @@ jobs:
             -Dsonar.projectKey=mr-carleone_starter-project
             -Dsonar.organization=8c6256c0-9db7-4e0d-ba61-1dee5eea40aa
             -Dsonar.sources=src
+            -Dsonar.scm.disabled=true
+            -Dsonar.analysis.automaticScan=false
             -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.python.version=3.11
