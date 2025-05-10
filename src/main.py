@@ -21,20 +21,18 @@ logger.info(f"ENV: {settings.ENV}, LOG_LEVEL: {settings.LOG_LEVEL}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Стартовая логика
-    logger.info("Starting application...")
-
-    logger.info("Starting application...")
-    await adb.connect()
-    logger.info("Database connection established")
-
-    # Удален блок инициализации данных
-
-    yield
-
-    logger.info("Shutting down application...")
-    await adb.engine.dispose()
-    logger.info("Database connection closed")
+    try:
+        logger.info("Database connection establishing...")
+        await adb.connect()  # Убедитесь, что engine инициализирован
+        logger.info("Database connection established")
+        yield
+    except Exception as e:
+        logger.error(f"Database connection error: {e}")
+        raise
+    finally:
+        logger.info("Shutting down application...")
+        if adb.engine:
+            await adb.engine.dispose()
 
 
 app = FastAPI(

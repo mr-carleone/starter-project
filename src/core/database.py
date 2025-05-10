@@ -1,6 +1,8 @@
 # src/core/database.py
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from src.core.config import settings
+from typing import Any
+from types import TracebackType
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,7 +18,9 @@ class AsyncDatabase:
         if settings.DB_MODE == "real":
             try:
                 self.engine = create_async_engine(
-                    settings.ASYNC_DATABASE_URL, echo=settings.DEBUG
+                    str(settings.ASYNC_DATABASE_URL),
+                    echo=settings.DEBUG,
+                    pool_pre_ping=True
                 )
                 self.async_session = async_sessionmaker(
                     self.engine, expire_on_commit=False, class_=AsyncSession
@@ -37,24 +41,40 @@ class AsyncDatabase:
 
 
 class MockAsyncSession:
-    async def __aenter__(self):
+    """Mock async session for testing purposes."""
+
+    async def __aenter__(self) -> "MockAsyncSession":
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        pass
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None
+    ) -> None:
+        """Handle context manager exit, ignoring any exceptions."""
+        if exc_val:
+            logger.debug("Mock session ignored exception: %s", exc_val)
 
-    async def execute(self, *args, **kwargs):
-        logger.info(f"Mock async execute: {args[0]}")
+    async def execute(
+        self,
+        statement: Any,
+    ) -> None:
+        """Log the executed statement and return mock result."""
+        logger.info("Mock async execute: %s", statement)
         return None
 
-    async def commit(self):
-        pass
+    async def commit(self) -> None:
+        """Mock commit operation."""
+        logger.debug("Mock commit")
 
-    async def rollback(self):
-        pass
+    async def rollback(self) -> None:
+        """Mock rollback operation."""
+        logger.debug("Mock rollback")
 
-    async def close(self):
-        pass
+    async def close(self) -> None:
+        """Mock connection close."""
+        logger.debug("Mock connection closed")
 
 
 adb = AsyncDatabase()

@@ -13,7 +13,7 @@ from src.core.config import settings
 from src.models.base import Base
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.SYNC_DATABASE_URL)
+config.set_main_option("sqlalchemy.url", str(settings.SYNC_DATABASE_URL))
 
 fileConfig(config.config_file_name)
 
@@ -36,4 +36,5 @@ def run_migrations_online():
         with context.begin_transaction():
             context.run_migrations()
 
-run_migrations_online()
+if __name__ == '__main__':
+    run_migrations_online()

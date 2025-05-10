@@ -1,6 +1,8 @@
 # src/core/config.py
 from pydantic_settings import BaseSettings
-from pydantic import PostgresDsn
+from pydantic import PostgresDsn, field_validator, computed_field
+from pydantic_core import MultiHostUrl
+from typing import Any
 
 
 class Settings(BaseSettings):
@@ -35,17 +37,36 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     DB_MODE: str = "mock"
 
+    @computed_field
     @property
-    def SYNC_DATABASE_URL(self) -> PostgresDsn:
-        return f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+    def SYNC_DATABASE_URL(self) -> str:
+        return self._build_db_url(sync=True)
 
+    @computed_field
     @property
-    def ASYNC_DATABASE_URL(self) -> PostgresDsn:
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+    def ASYNC_DATABASE_URL(self) -> str:
+        return self._build_db_url(sync=False)
+
+    def _build_db_url(self, sync: bool) -> PostgresDsn:
+        driver = "psycopg2" if sync else "asyncpg"
+        return PostgresDsn(
+            f"postgresql+{driver}://"
+            f"{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}"
+            f"/{self.POSTGRES_DB}"
+        )
+
+    @field_validator("SYNC_DATABASE_URL", "ASYNC_DATABASE_URL", mode="before")
+    @classmethod
+    def validate_db_url(cls, v: Any) -> MultiHostUrl:
+        if isinstance(v, MultiHostUrl):
+            return v
+        return PostgresDsn(v)
 
     class Config:
         env_file = ".env"
         extra = "ignore"
+        validate_assignment = True
 
 
 settings = Settings()
