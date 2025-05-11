@@ -20,3 +20,5 @@ venv
 LICENSE
 .sonarlint
 .vscode
+.coverage
+*.xml
